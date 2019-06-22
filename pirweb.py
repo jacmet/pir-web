@@ -142,7 +142,7 @@ def events():
 
 if __name__ == "__main__":
     init_db()
-    if 'fcgi' in sys.argv:
-        WSGIServer(app).run()
-    else:
+    if 'debug' in sys.argv:
         app.run(debug=True)
+    else:
+        WSGIServer(app).run()
