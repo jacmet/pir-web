@@ -14,6 +14,12 @@ project_dir = os.path.dirname(os.path.abspath(__file__))
 # number of minutes in each event "block"
 BLOCK_MINUTES = 30
 
+# valid IDs
+IDS = {
+    'spain': 1,
+    'denmark': 2
+    }
+
 app = Flask(__name__)
 
 
@@ -22,7 +28,7 @@ def init_db():
         with get_db() as db:
             db.execute('create table if not exists events '
                        '(ts datetime not null, count integer not null, '
-                       'primary key (ts), unique (ts))')
+                       ' id integer, primary key (ts), unique (ts))')
 
 
 def get_db():
@@ -106,27 +112,30 @@ def root():
     return redirect(url_for('static', filename='index.html'))
 
 
-@app.route("/add")
-def add():
+@app.route("/add/<id>")
+def add(id):
+    id = IDS[id]
     now = datetime.datetime.utcnow()
     block = now.minute - (now.minute % BLOCK_MINUTES)
     now = now.replace(minute=block, second=0, microsecond=0)
     try:
         with get_db() as db:
-            db.execute('insert into events (ts,count) values (?, 1)', [now])
+            db.execute('insert into events (ts,count,id) values (?, 1, ?)', [now, id])
     except sqlite3.IntegrityError:
         with get_db() as db:
-            db.execute('update events set count=count+1 where "ts"=?', [now])
+            db.execute('update events set count=count+1 where "ts"=? and id=?', [now, id])
 
     return "Added"
 
 
 @app.route("/events")
 def events():
+    id = IDS[request.args.get('id')]
     start = request.args.get('start', '')
     end = request.args.get('end', '')
     events = query_db('select * from events where ts >= datetime(?) '
-                      'and ts < datetime(?) order by ts', [start, end])
+                      'and ts < datetime(?) and id=? order by ts',
+                      [start, end, id])
     return Response(json.dumps(list(to_events(events))),
                     mimetype='application/json')
 

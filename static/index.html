@@ -15,7 +15,25 @@
   document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
 
+    var calendar_id = 'spain';
+
     var calendar = new FullCalendar.Calendar(calendarEl, {
+      customButtons: {
+        spainView: {
+          text: 'Spain',
+            click: function() {
+              calendar_id = 'spain';
+	      calendar.refetchEvents();
+            }
+        },
+	denmarkView: {
+          text: 'Denmark',
+            click: function() {
+	      calendar_id = 'denmark';
+	      calendar.refetchEvents();
+            }
+        }
+      },
       views: {
         timeGridWeek: {
           allDaySlot: false,
@@ -41,6 +59,9 @@
         center: 'title',
         right: 'dayGridMonth,timeGridWeek'
       },
+      footer: {
+        right: 'spainView,denmarkView'
+      },
       defaultView: 'timeGridWeek',
       navLinks: true, // can click day/week names to navigate views
       events: {
@@ -50,7 +71,7 @@
         },
  	extraParams: function(cal) {
 	  return {
-           type: 1
+           id: calendar_id
           };
 	}
       },
