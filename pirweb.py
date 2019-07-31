@@ -28,7 +28,7 @@ def init_db():
         with get_db() as db:
             db.execute('create table if not exists events '
                        '(ts datetime not null, count integer not null, '
-                       ' id integer, primary key (ts), unique (ts))')
+                       ' id integer, unique (ts, id))')
 
 
 def get_db():
